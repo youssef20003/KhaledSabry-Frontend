@@ -5,48 +5,162 @@ type RequestOptions = RequestInit & {
   auth?: boolean;
 };
 
+const configuredApiBaseUrl = (
+  process.env.NEXT_PUBLIC_API_BASE_URL ??
+  "https://khaledsabry-backend.onrender.com"
+).replace(/\/+$/, "");
+const apiBaseUrl = configuredApiBaseUrl.endsWith("/api") ? configuredApiBaseUrl : `${configuredApiBaseUrl}/api`;
+
+async function readResponsePayload(response: Response) {
+  const contentType = response.headers.get("content-type") ?? "";
+
+  if (response.status === 204) return undefined;
+  if (contentType.includes("application/json")) {
+    const json = await response.json().catch(() => undefined);
+    if (typeof json === "string") {
+      return JSON.parse(json);
+    }
+
+    return json;
+  }
+
+  const text = await response.text().catch(() => "");
+  if (text.startsWith("{") || text.startsWith("[")) {
+    return JSON.parse(text);
+  }
+
+  return text || undefined;
+}
+
+function getErrorMessage(payload: unknown) {
+  if (!payload) return "Request failed.";
+  if (typeof payload === "string") return payload;
+  if (typeof payload !== "object") return "Request failed.";
+
+  const body = payload as {
+    errors?: string[] | Record<string, string[]>;
+    message?: string;
+    title?: string;
+  };
+  const errors = Array.isArray(body.errors)
+    ? body.errors
+    : body.errors
+      ? Object.values(body.errors).flat()
+      : [];
+
+  return [body.message ?? body.title ?? "Request failed.", ...errors].join(" ");
+}
+
+function asRecord(payload: unknown) {
+  return payload && typeof payload === "object" ? payload as Record<string, unknown> : {};
+}
+
+function normalizeProduct(payload: unknown): Product {
+  const product = asRecord(payload);
+  const price = Number(product.price ?? 0);
+  const discountPercentage = Number(product.discountPercentage ?? 0);
+
+  return {
+    id: Number(product.id ?? 0),
+    name: String(product.name ?? ""),
+    description: String(product.description ?? ""),
+    pictureUrl: String(product.pictureUrl ?? ""),
+    imageUrls: Array.isArray(product.imageUrls) ? product.imageUrls.map(String) : [],
+    price,
+    discountPercentage,
+    priceAfterDiscount: Number(product.priceAfterDiscount ?? price),
+    colors: Array.isArray(product.colors) ? product.colors.map(String) : [],
+    sizes: Array.isArray(product.sizes) ? product.sizes.map(String) : [],
+    material: String(product.material ?? ""),
+    gender: String(product.gender ?? ""),
+    stockQuantity: Number(product.stockQuantity ?? 0),
+    isFeatured: Boolean(product.isFeatured),
+    isActive: product.isActive !== false,
+    brandId: Number(product.brandId ?? 0),
+    typeId: Number(product.typeId ?? 0),
+    brandName: String(product.brandName ?? ""),
+    typeName: String(product.typeName ?? "")
+  };
+}
+
+function normalizeProductList(payload: unknown) {
+  const body = asRecord(payload);
+  const data = Array.isArray(payload)
+    ? payload
+    : Array.isArray(body.data)
+      ? body.data
+      : Array.isArray(body.items)
+        ? body.items
+        : Array.isArray(body.products)
+          ? body.products
+          : [];
+
+  return data.map(normalizeProduct);
+}
+
+function normalizeProductPage(payload: unknown, fallbackPageSize: number): PaginationResult<Product> {
+  const body = asRecord(payload);
+  const data = normalizeProductList(payload);
+
+  return {
+    pageIndex: Number(body.pageIndex ?? body.pageNumber ?? body.currentPage ?? 1),
+    pageSize: Number(body.pageSize ?? fallbackPageSize),
+    totalCount: Number(body.totalCount ?? body.count ?? body.total ?? data.length),
+    data
+  };
+}
+
 async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const headers = new Headers(options.headers);
-  headers.set("Content-Type", "application/json");
+  if (options.body) headers.set("Content-Type", "application/json");
 
   if (options.auth) {
     const token = getAdminSession()?.token;
     if (token) headers.set("Authorization", `Bearer ${token}`);
   }
 
-  const response = await fetch(`/api/backend${path}`, {
-    ...options,
-    headers,
-    cache: "no-store"
-  });
+  const url = `${apiBaseUrl}${path}`;
+  let response: Response;
 
-  if (!response.ok) {
-    const payload = await response.json().catch(() => ({}));
-    const errors = Array.isArray(payload.errors) ? ` ${payload.errors.join(", ")}` : "";
-    throw new Error(`${payload.message ?? "Request failed."}${errors}`);
+  try {
+    response = await fetch(url, {
+      ...options,
+      headers,
+      cache: "no-store"
+    });
+  } catch {
+    throw new Error(
+      `Could not reach the API. If ${url} opens in the browser, the backend probably needs to allow this frontend domain in CORS.`
+    );
   }
 
-  return response.json() as Promise<T>;
+  if (!response.ok) {
+    const payload = await readResponsePayload(response);
+    throw new Error(getErrorMessage(payload));
+  }
+
+  return readResponsePayload(response) as Promise<T>;
 }
 
 export function getProducts(params: URLSearchParams) {
-  return request<PaginationResult<Product>>(`/products?${params.toString()}`);
+  const pageSize = Number(params.get("pageSize") ?? 8);
+  return request<unknown>(`/products?${params.toString()}`).then(payload => normalizeProductPage(payload, pageSize));
 }
 
 export function getFeaturedProducts(take = 4) {
-  return request<Product[]>(`/products/featured?take=${take}`);
+  return request<unknown>(`/products/featured?take=${take}`).then(normalizeProductList);
 }
 
 export function getProduct(id: number) {
-  return request<Product>(`/products/${id}`);
+  return request<unknown>(`/products/${id}`).then(normalizeProduct);
 }
 
 export function getBrands() {
-  return request<CatalogOption[]>("/products/brands");
+  return request<CatalogOption[]>("/products/Brands");
 }
 
 export function getTypes() {
-  return request<CatalogOption[]>("/products/types");
+  return request<CatalogOption[]>("/products/Types");
 }
 
 export async function ensureCart() {
@@ -114,14 +228,17 @@ export async function placeOrder(customer: CheckoutForm, cart: Cart) {
 }
 
 export function loginAdmin(email: string, password: string) {
-  return request<UserSession>("/authentication/login", {
+  return request<UserSession>("/Authentication/Login", {
     method: "POST",
     body: JSON.stringify({ email, password })
   });
 }
 
 export function getAdminProducts(params: URLSearchParams) {
-  return request<PaginationResult<Product>>(`/admin/products?${params.toString()}`, { auth: true });
+  const pageSize = Number(params.get("pageSize") ?? 24);
+  return request<unknown>(`/admin/products?${params.toString()}`, { auth: true }).then(payload =>
+    normalizeProductPage(payload, pageSize)
+  );
 }
 
 export function createProduct(product: ProductUpsert) {
@@ -156,5 +273,5 @@ export function deleteProduct(id: number) {
 }
 
 export function getAdminOrders() {
-  return request<Order[]>("/orders/allorders", { auth: true });
+  return request<Order[]>("/orders/AllOrders", { auth: true });
 }

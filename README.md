@@ -9,10 +9,10 @@ npm install
 npm run dev
 ```
 
-The app proxies API calls through `/api/backend/*` to avoid browser CORS issues. By default it targets:
+The React app calls the deployed backend directly by default:
 
 ```bash
-https://khaledsabry-backend.onrender.com/api
+https://khaledsabry-backend.onrender.com
 ```
 
-Override it with `API_BASE_URL` or `NEXT_PUBLIC_API_BASE_URL`.
+Override it with `NEXT_PUBLIC_API_BASE_URL`. You can provide either the backend root URL or the `/api` URL.

@@ -3,7 +3,7 @@
 import { Product } from "@/lib/types";
 import { ProductCard } from "./ProductCard";
 
-export function ProductGrid({ products }: { products: Product[] }) {
+export function ProductGrid({ products = [] }: { products?: Product[] }) {
   if (products.length === 0) {
     return <div className="empty">No products found.</div>;
   }
