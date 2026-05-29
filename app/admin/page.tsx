@@ -2,20 +2,39 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
-import { Boxes, ClipboardList, LogIn, LogOut } from "lucide-react";
-import { loginAdmin } from "@/lib/api";
+import { Boxes, ClipboardList, LogIn, LogOut, Save, Truck } from "lucide-react";
+import { getShippingFee, loginAdmin, updateShippingFee } from "@/lib/api";
+import { money } from "@/lib/format";
 import { clearAdminSession, getAdminSession, setAdminSession } from "@/lib/storage";
-import { UserSession } from "@/lib/types";
+import { ShippingFee, UserSession } from "@/lib/types";
 
 export default function AdminPage() {
   const [session, setSession] = useState<UserSession | null>(null);
   const [email, setEmail] = useState("admin@shop.com");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
+  const [shipping, setShipping] = useState<ShippingFee | null>(null);
+  const [shippingFee, setShippingFee] = useState("0");
+  const [shippingMessage, setShippingMessage] = useState("");
 
   useEffect(() => {
-    setSession(getAdminSession());
+    const savedSession = getAdminSession();
+    setSession(savedSession);
+    if (savedSession) {
+      loadShipping();
+    }
   }, []);
+
+  async function loadShipping() {
+    try {
+      const value = await getShippingFee();
+      setShipping(value);
+      setShippingFee(String(value.shippingFee));
+      setShippingMessage("");
+    } catch (error) {
+      setShippingMessage(error instanceof Error ? error.message : "Could not load shipping fee.");
+    }
+  }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -25,8 +44,22 @@ export default function AdminPage() {
       setAdminSession(user);
       setSession(user);
       setMessage("");
+      await loadShipping();
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Could not sign in.");
+    }
+  }
+
+  async function saveShipping(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setShippingMessage("Saving shipping fee...");
+    try {
+      const next = await updateShippingFee(Number(shippingFee));
+      setShipping(next);
+      setShippingFee(String(next.shippingFee));
+      setShippingMessage("Shipping fee saved.");
+    } catch (error) {
+      setShippingMessage(error instanceof Error ? error.message : "Could not save shipping fee.");
     }
   }
 
@@ -51,7 +84,7 @@ export default function AdminPage() {
             <section className="panel p-3 p-md-4">
               <h2 className="h3 fw-black mb-3">Welcome, {session.displayName}</h2>
               <div className="row g-3">
-                <div className="col-md-6">
+                <div className="col-md-5">
                   <Link className="btn btn-dark btn-lg w-100 d-inline-flex align-items-center justify-content-center gap-2" href="/admin/products">
                     <Boxes size={18} />
                     Manage products
@@ -70,6 +103,33 @@ export default function AdminPage() {
                   </button>
                 </div>
               </div>
+              <form className="row g-3 align-items-end border-top mt-4 pt-4" onSubmit={saveShipping}>
+                <div className="col-md-7">
+                  <label className="form-label small text-muted fw-bold d-flex align-items-center gap-2">
+                    <Truck size={16} />
+                    Shipping fee
+                  </label>
+                  <input
+                    className="form-control form-control-lg"
+                    min="0"
+                    step="0.01"
+                    type="number"
+                    value={shippingFee}
+                    onChange={event => setShippingFee(event.target.value)}
+                    required
+                  />
+                </div>
+                <div className="col-md-3">
+                  <button className="btn btn-dark btn-lg w-100 d-inline-flex align-items-center justify-content-center gap-2" type="submit">
+                    <Save size={18} />
+                    Save
+                  </button>
+                </div>
+                <div className="col-md-2 fw-black text-md-end">
+                  {money.format(shipping?.shippingFee ?? Number(shippingFee || 0))}
+                </div>
+                <p className="message mb-0">{shippingMessage}</p>
+              </form>
             </section>
           ) : (
             <section className="panel p-3 p-md-4 mx-auto" style={{ maxWidth: 560 }}>

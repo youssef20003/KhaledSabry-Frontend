@@ -7,7 +7,6 @@ import {
   createProduct,
   deleteProduct,
   getAdminProducts,
-  getBrands,
   getTypes,
   setProductDiscount,
   updateProduct
@@ -36,7 +35,6 @@ const blankProduct: ProductUpsert = {
 export default function AdminProductsPage() {
   const formPanelRef = useRef<HTMLElement | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
-  const [brands, setBrands] = useState<CatalogOption[]>([]);
   const [types, setTypes] = useState<CatalogOption[]>([]);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [form, setForm] = useState(blankProduct);
@@ -47,9 +45,8 @@ export default function AdminProductsPage() {
 
   async function load() {
     const params = new URLSearchParams({ pageIndex: "1", pageSize: "24", includeInactive: "true" });
-    const [productResult, brandResult, typeResult] = await Promise.all([getAdminProducts(params), getBrands(), getTypes()]);
+    const [productResult, typeResult] = await Promise.all([getAdminProducts(params), getTypes()]);
     setProducts(productResult.data);
-    setBrands(brandResult);
     setTypes(typeResult);
   }
 
@@ -114,6 +111,7 @@ export default function AdminProductsPage() {
     event.preventDefault();
     const payload = {
       ...form,
+      brandId: 1,
       colors: splitList(colorText),
       sizes: splitList(sizeText),
       imageUrls: splitList(imageText)
@@ -184,12 +182,6 @@ export default function AdminProductsPage() {
                 <div className="col-md-6 col-xl-3">
                   <label className="form-label small text-muted fw-bold">Stock</label>
                   <input className="form-control" type="number" value={form.stockQuantity} onChange={event => setForm({ ...form, stockQuantity: Number(event.target.value) })} />
-                </div>
-                <div className="col-md-6 col-xl-3">
-                  <label className="form-label small text-muted fw-bold">Brand</label>
-                  <select className="form-select" value={form.brandId} onChange={event => setForm({ ...form, brandId: Number(event.target.value) })}>
-                    {brands.map(brand => <option key={brand.id} value={brand.id}>{brand.name}</option>)}
-                  </select>
                 </div>
                 <div className="col-md-6 col-xl-3">
                   <label className="form-label small text-muted fw-bold">Type</label>

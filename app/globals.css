@@ -323,6 +323,53 @@ a {
   font-weight: 700;
 }
 
+.loader-screen {
+  display: grid;
+  min-height: calc(100vh - 125px);
+  place-items: center;
+  align-content: center;
+  gap: 1rem;
+  background: var(--makz-paper);
+}
+
+.loader-logo-wrap {
+  display: grid;
+  width: 108px;
+  height: 108px;
+  place-items: center;
+  border: 1px solid var(--makz-line);
+  border-radius: 1rem;
+  background: #fff;
+  box-shadow: 0 1rem 3rem rgba(22, 22, 22, 0.12);
+  animation: loader-pulse 1.3s ease-in-out infinite;
+}
+
+.loader-logo {
+  width: 84px;
+  height: 84px;
+  object-fit: cover;
+  border-radius: 0.65rem;
+}
+
+.loader-wordmark {
+  color: var(--makz-accent-dark);
+  font-weight: 950;
+  letter-spacing: 0.18em;
+}
+
+@keyframes loader-pulse {
+  0%,
+  100% {
+    opacity: 0.72;
+    transform: scale(0.96);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 @media (max-width: 991.98px) {
   .navbar-collapse {
     padding-top: 1rem;

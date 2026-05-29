@@ -45,6 +45,11 @@ export default function AdminOrdersPage() {
                   </div>
                   <strong className="fs-4">{money.format(order.total)}</strong>
                 </div>
+                <div className="d-flex flex-wrap gap-3 mb-3 text-muted fw-bold">
+                  <span>Subtotal: {money.format(order.subtotal)}</span>
+                  <span>Shipping: {money.format(order.shippingFee ?? 0)}</span>
+                  <span>{order.deliveryMethod}</span>
+                </div>
                 <p className="text-muted">
                   {order.address.firstName} {order.address.lastName}, {order.address.street}, {order.address.city},{" "}
                   {order.address.country}

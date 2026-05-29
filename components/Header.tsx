@@ -12,7 +12,7 @@ export function Header() {
   return (
     <>
       <div className="promo-bar text-center small fw-semibold">
-        Free delivery in Egypt on selected MAK-Z drops
+        New MAK-Z drops starting now
       </div>
       <header className="navbar navbar-expand-lg sticky-top bg-white border-bottom">
         <div className="container-xl">

@@ -71,6 +71,12 @@ export type Cart = {
   updatedAt: string;
 };
 
+export type ShippingFee = {
+  deliveryMethod: string;
+  description: string;
+  shippingFee: number;
+};
+
 export type CheckoutForm = {
   firstName: string;
   lastName: string;
@@ -94,6 +100,7 @@ export type Order = {
     country: string;
   };
   deliveryMethod: string;
+  shippingFee: number;
   orderState: string;
   items: Array<{
     productName: string;

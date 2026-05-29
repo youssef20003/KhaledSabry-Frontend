@@ -4,15 +4,16 @@ import Link from "next/link";
 import { useMemo } from "react";
 import { ArrowRight } from "lucide-react";
 import { money } from "@/lib/format";
+import { productImage, useImageFallback } from "@/lib/images";
 import { Product } from "@/lib/types";
 
 export function ProductCard({ product }: { product: Product }) {
   const hasDiscount = product.discountPercentage > 0;
-  const image = useMemo(() => product.pictureUrl || product.imageUrls[0], [product]);
+  const image = useMemo(() => productImage(product.pictureUrl, product.imageUrls), [product]);
 
   return (
     <Link className="product-card d-flex flex-column text-reset" href={`/products/${product.id}`}>
-      <img className="product-image" src={image} alt={product.name} />
+      <img className="product-image" src={image} alt={product.name} onError={event => useImageFallback(event.currentTarget)} />
       <div className="p-3 p-md-4 d-flex flex-column gap-3 flex-grow-1">
         <div className="d-flex align-items-start justify-content-between gap-3">
           <div>

@@ -3,9 +3,10 @@
 import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import { Minus, Plus, Trash2 } from "lucide-react";
-import { ensureCart, placeOrder, removeCartItem, updateCartItem } from "@/lib/api";
+import { ensureCart, getShippingFee, placeOrder, removeCartItem, updateCartItem } from "@/lib/api";
 import { money } from "@/lib/format";
-import { Cart, CheckoutForm } from "@/lib/types";
+import { shirtPlaceholder, useImageFallback } from "@/lib/images";
+import { Cart, CheckoutForm, ShippingFee } from "@/lib/types";
 
 const blankCustomer: CheckoutForm = {
   firstName: "",
@@ -19,11 +20,14 @@ const blankCustomer: CheckoutForm = {
 
 export default function CartPage() {
   const [cart, setCart] = useState<Cart | null>(null);
+  const [shipping, setShipping] = useState<ShippingFee | null>(null);
   const [customer, setCustomer] = useState(blankCustomer);
   const [message, setMessage] = useState("");
 
   async function load() {
-    setCart(await ensureCart());
+    const [nextCart, nextShipping] = await Promise.all([ensureCart(), getShippingFee()]);
+    setCart(nextCart);
+    setShipping(nextShipping);
   }
 
   useEffect(() => {
@@ -33,6 +37,10 @@ export default function CartPage() {
   async function changeQty(productId: number, color: string, size: string, quantity: number) {
     setCart(await updateCartItem(productId, color, size, quantity));
   }
+
+  const subtotal = cart?.subtotal ?? 0;
+  const shippingFee = shipping?.shippingFee ?? 0;
+  const total = subtotal + shippingFee;
 
   async function remove(productId: number, color: string, size: string) {
     setCart(await removeCartItem(productId, color, size));
@@ -81,7 +89,12 @@ export default function CartPage() {
                   cart.items.map(item => (
                     <article className="panel p-3" key={`${item.productId}-${item.color}-${item.size}`}>
                       <div className="d-flex gap-3 align-items-start">
-                        <img className="cart-thumb flex-shrink-0" src={item.pictureUrl} alt={item.productName} />
+                        <img
+                          className="cart-thumb flex-shrink-0"
+                          src={item.pictureUrl || shirtPlaceholder}
+                          alt={item.productName}
+                          onError={event => useImageFallback(event.currentTarget)}
+                        />
                         <div className="flex-grow-1">
                           <h2 className="h5 fw-black mb-1">{item.productName}</h2>
                           <p className="text-muted small mb-2">
@@ -110,9 +123,19 @@ export default function CartPage() {
 
             <div className="col-lg-5">
               <section className="panel p-3 p-md-4 position-sticky" style={{ top: 120 }}>
-                <div className="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
-                  <span className="fw-black">Subtotal</span>
-                  <span className="fs-4 fw-black">{money.format(cart?.subtotal ?? 0)}</span>
+                <div className="d-grid gap-2 border-bottom pb-3 mb-3">
+                  <div className="d-flex justify-content-between align-items-center">
+                    <span className="fw-black">Subtotal</span>
+                    <span className="fw-bold">{money.format(subtotal)}</span>
+                  </div>
+                  <div className="d-flex justify-content-between align-items-center">
+                    <span className="fw-black">Shipping</span>
+                    <span className="fw-bold">{money.format(shippingFee)}</span>
+                  </div>
+                  <div className="d-flex justify-content-between align-items-center pt-2">
+                    <span className="fw-black">Total</span>
+                    <span className="fs-4 fw-black">{money.format(total)}</span>
+                  </div>
                 </div>
                 <h2 className="h4 fw-black mb-3">Checkout Details</h2>
                 <form className="d-grid gap-3" onSubmit={submit}>

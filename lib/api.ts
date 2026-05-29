@@ -1,5 +1,5 @@
 import { clearCartId, getAdminSession, getCartId, setCartId } from "./storage";
-import { Cart, CatalogOption, CheckoutForm, Order, PaginationResult, Product, ProductUpsert, UserSession } from "./types";
+import { Cart, CatalogOption, CheckoutForm, Order, PaginationResult, Product, ProductUpsert, ShippingFee, UserSession } from "./types";
 
 type RequestOptions = RequestInit & {
   auth?: boolean;
@@ -155,10 +155,6 @@ export function getProduct(id: number) {
   return request<unknown>(`/products/${id}`).then(normalizeProduct);
 }
 
-export function getBrands() {
-  return request<CatalogOption[]>("/products/Brands");
-}
-
 export function getTypes() {
   return request<CatalogOption[]>("/products/Types");
 }
@@ -274,4 +270,16 @@ export function deleteProduct(id: number) {
 
 export function getAdminOrders() {
   return request<Order[]>("/orders/AllOrders", { auth: true });
+}
+
+export function getShippingFee() {
+  return request<ShippingFee>("/orders/shipping");
+}
+
+export function updateShippingFee(shippingFee: number) {
+  return request<ShippingFee>("/orders/shipping", {
+    method: "PATCH",
+    body: JSON.stringify({ shippingFee }),
+    auth: true
+  });
 }

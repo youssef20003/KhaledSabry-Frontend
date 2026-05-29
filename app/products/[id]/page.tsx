@@ -5,6 +5,7 @@ import { use, useEffect, useMemo, useState } from "react";
 import { ArrowLeft, ShoppingCart } from "lucide-react";
 import { addCartItem, getProduct } from "@/lib/api";
 import { money } from "@/lib/format";
+import { productImage, useImageFallback } from "@/lib/images";
 import { Product } from "@/lib/types";
 
 export default function ProductDetailsPage({ params }: { params: Promise<{ id: string }> }) {
@@ -21,7 +22,7 @@ export default function ProductDetailsPage({ params }: { params: Promise<{ id: s
   useEffect(() => {
     getProduct(productId)
       .then(data => {
-        const image = data.pictureUrl || data.imageUrls[0] || "";
+        const image = productImage(data.pictureUrl, data.imageUrls);
         setProduct(data);
         setSelectedImage(image);
         setColor(data.colors[0] ?? "");
@@ -33,7 +34,7 @@ export default function ProductDetailsPage({ params }: { params: Promise<{ id: s
 
   const gallery = useMemo(() => {
     if (!product) return [];
-    return Array.from(new Set([product.pictureUrl, ...product.imageUrls].filter(Boolean)));
+    return Array.from(new Set([productImage(product.pictureUrl, product.imageUrls), ...product.imageUrls].filter(Boolean)));
   }, [product]);
 
   async function add() {
@@ -75,7 +76,7 @@ export default function ProductDetailsPage({ params }: { params: Promise<{ id: s
 
         <section className="row g-4 g-lg-5 align-items-start">
           <div className="col-lg-6">
-            <img className="detail-image" src={selectedImage} alt={product.name} />
+            <img className="detail-image" src={selectedImage} alt={product.name} onError={event => useImageFallback(event.currentTarget)} />
             {gallery.length > 1 && (
               <div className="d-flex flex-wrap gap-2 mt-3">
                 {gallery.map(image => (
@@ -86,7 +87,7 @@ export default function ProductDetailsPage({ params }: { params: Promise<{ id: s
                     onClick={() => setSelectedImage(image)}
                     aria-label={`Show ${product.name} image`}
                   >
-                    <img src={image} alt="" />
+                    <img src={image} alt="" onError={event => useImageFallback(event.currentTarget)} />
                   </button>
                 ))}
               </div>
