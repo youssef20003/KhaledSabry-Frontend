@@ -13,6 +13,7 @@ import {
 } from "@/lib/api";
 import { joinList, money, splitList } from "@/lib/format";
 import { CatalogOption, Product, ProductUpsert } from "@/lib/types";
+import { DataLoader } from "@/components/DataLoader";
 
 const blankProduct: ProductUpsert = {
   name: "",
@@ -41,17 +42,23 @@ export default function AdminProductsPage() {
   const [colorText, setColorText] = useState("");
   const [sizeText, setSizeText] = useState("");
   const [imageText, setImageText] = useState("");
+  const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
 
   async function load() {
+    setLoading(true);
     const params = new URLSearchParams({ pageIndex: "1", pageSize: "24", includeInactive: "true" });
     const [productResult, typeResult] = await Promise.all([getAdminProducts(params), getTypes()]);
     setProducts(productResult.data);
     setTypes(typeResult);
+    setLoading(false);
   }
 
   useEffect(() => {
-    load().catch(error => setMessage(error.message));
+    load().catch(error => {
+      setMessage(error.message);
+      setLoading(false);
+    });
   }, []);
 
   function edit(product: Product) {
@@ -255,7 +262,7 @@ export default function AdminProductsPage() {
           </section>
 
           <section className="d-grid gap-3">
-            {products.map(product => (
+            {loading ? <DataLoader label="Loading products" /> : products.map(product => (
               <article className="panel p-3" key={product.id}>
                 <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
                   <div>
@@ -281,6 +288,7 @@ export default function AdminProductsPage() {
                 </div>
               </article>
             ))}
+            {!loading && products.length === 0 && !message && <div className="empty">No products yet.</div>}
           </section>
         </div>
       </section>

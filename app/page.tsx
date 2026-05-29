@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { getFeaturedProducts } from "@/lib/api";
 import { Product } from "@/lib/types";
+import { DataLoader } from "@/components/DataLoader";
 import { ProductGrid } from "@/components/ProductGrid";
 
 const brandImages = [
@@ -16,10 +17,15 @@ const brandImages = [
 
 export default function HomePage() {
   const [products, setProducts] = useState<Product[]>([]);
+  const [loadingProducts, setLoadingProducts] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    getFeaturedProducts(4).then(setProducts).catch(error => setError(error.message));
+    setLoadingProducts(true);
+    getFeaturedProducts(4)
+      .then(setProducts)
+      .catch(error => setError(error.message))
+      .finally(() => setLoadingProducts(false));
   }, []);
 
   return (
@@ -103,7 +109,7 @@ export default function HomePage() {
               View all
             </Link>
           </div>
-          {error ? <div className="empty">{error}</div> : <ProductGrid products={products} />}
+          {loadingProducts ? <DataLoader label="Loading collection" /> : error ? <div className="empty">{error}</div> : <ProductGrid products={products} />}
         </div>
       </section>
     </main>

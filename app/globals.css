@@ -332,6 +332,17 @@ a {
   background: var(--makz-paper);
 }
 
+.data-loader {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 1rem;
+  min-height: 240px;
+  border: 1px dashed #cfc7bb;
+  border-radius: 1rem;
+  background: #fff;
+}
+
 .loader-logo-wrap {
   display: grid;
   width: 108px;

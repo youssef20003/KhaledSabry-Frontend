@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Search } from "lucide-react";
 import { getProducts } from "@/lib/api";
 import { Product, PaginationResult } from "@/lib/types";
+import { DataLoader } from "@/components/DataLoader";
 import { ProductGrid } from "@/components/ProductGrid";
 
 const emptyResult: PaginationResult<Product> = {
@@ -20,6 +21,7 @@ export default function ProductsPage() {
   const [sort, setSort] = useState("");
   const [color, setColor] = useState("");
   const [size, setSize] = useState("");
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   const totalPages = Math.max(1, Math.ceil(result.totalCount / result.pageSize));
@@ -34,12 +36,14 @@ export default function ProductsPage() {
   }, [page, search, sort, color, size]);
 
   useEffect(() => {
+    setLoading(true);
     getProducts(params)
       .then(data => {
         setResult(data);
         setError("");
       })
-      .catch(error => setError(error.message));
+      .catch(error => setError(error.message))
+      .finally(() => setLoading(false));
   }, [params]);
 
   return (
@@ -92,7 +96,7 @@ export default function ProductsPage() {
             </div>
           </div>
 
-          {error ? <div className="empty">{error}</div> : <ProductGrid products={result.data} />}
+          {loading ? <DataLoader label="Loading products" /> : error ? <div className="empty">{error}</div> : <ProductGrid products={result.data} />}
 
           <div className="d-flex align-items-center justify-content-center gap-3 pt-4">
             <button className="btn btn-outline-dark" disabled={page <= 1} onClick={() => setPage(value => value - 1)}>

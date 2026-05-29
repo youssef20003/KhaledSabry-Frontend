@@ -5,13 +5,19 @@ import Link from "next/link";
 import { getAdminOrders } from "@/lib/api";
 import { money } from "@/lib/format";
 import { Order } from "@/lib/types";
+import { DataLoader } from "@/components/DataLoader";
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
 
   useEffect(() => {
-    getAdminOrders().then(setOrders).catch(error => setMessage(error.message));
+    setLoading(true);
+    getAdminOrders()
+      .then(setOrders)
+      .catch(error => setMessage(error.message))
+      .finally(() => setLoading(false));
   }, []);
 
   return (
@@ -34,7 +40,7 @@ export default function AdminOrdersPage() {
           {message && <div className="empty mb-3">{message}</div>}
 
           <div className="d-grid gap-3">
-            {orders.map(order => (
+            {loading ? <DataLoader label="Loading orders" /> : orders.map(order => (
               <article className="panel p-3 p-md-4" key={order.id}>
                 <div className="d-flex flex-column flex-md-row justify-content-between gap-3 border-bottom pb-3 mb-3">
                   <div>
@@ -69,7 +75,7 @@ export default function AdminOrdersPage() {
                 </div>
               </article>
             ))}
-            {orders.length === 0 && !message && <div className="empty">No orders yet.</div>}
+            {!loading && orders.length === 0 && !message && <div className="empty">No orders yet.</div>}
           </div>
         </div>
       </section>

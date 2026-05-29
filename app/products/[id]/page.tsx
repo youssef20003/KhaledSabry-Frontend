@@ -7,6 +7,7 @@ import { addCartItem, getProduct } from "@/lib/api";
 import { money } from "@/lib/format";
 import { productImage, useImageFallback } from "@/lib/images";
 import { Product } from "@/lib/types";
+import { DataLoader } from "@/components/DataLoader";
 
 export default function ProductDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -17,9 +18,11 @@ export default function ProductDetailsPage({ params }: { params: Promise<{ id: s
   const [size, setSize] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
+    setLoading(true);
     getProduct(productId)
       .then(data => {
         const image = productImage(data.pictureUrl, data.imageUrls);
@@ -29,7 +32,8 @@ export default function ProductDetailsPage({ params }: { params: Promise<{ id: s
         setSize(data.sizes[0] ?? "");
         setMessage("");
       })
-      .catch(error => setMessage(error instanceof Error ? error.message : "Could not load product."));
+      .catch(error => setMessage(error instanceof Error ? error.message : "Could not load product."))
+      .finally(() => setLoading(false));
   }, [productId]);
 
   const gallery = useMemo(() => {
@@ -58,7 +62,9 @@ export default function ProductDetailsPage({ params }: { params: Promise<{ id: s
           <ArrowLeft size={16} />
           Products
         </Link>
-        <div className="empty" style={{ marginTop: 18 }}>{message || "Loading product..."}</div>
+        <div style={{ marginTop: 18 }}>
+          {loading ? <DataLoader label="Loading product" /> : <div className="empty">{message || "Product not found."}</div>}
+        </div>
       </main>
     );
   }

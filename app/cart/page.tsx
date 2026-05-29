@@ -7,6 +7,7 @@ import { ensureCart, getShippingFee, placeOrder, removeCartItem, updateCartItem 
 import { money } from "@/lib/format";
 import { shirtPlaceholder, useImageFallback } from "@/lib/images";
 import { Cart, CheckoutForm, ShippingFee } from "@/lib/types";
+import { DataLoader } from "@/components/DataLoader";
 
 const blankCustomer: CheckoutForm = {
   firstName: "",
@@ -22,16 +23,22 @@ export default function CartPage() {
   const [cart, setCart] = useState<Cart | null>(null);
   const [shipping, setShipping] = useState<ShippingFee | null>(null);
   const [customer, setCustomer] = useState(blankCustomer);
+  const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
 
   async function load() {
+    setLoading(true);
     const [nextCart, nextShipping] = await Promise.all([ensureCart(), getShippingFee()]);
     setCart(nextCart);
     setShipping(nextShipping);
+    setLoading(false);
   }
 
   useEffect(() => {
-    load().catch(error => setMessage(error.message));
+    load().catch(error => {
+      setMessage(error.message);
+      setLoading(false);
+    });
   }, []);
 
   async function changeQty(productId: number, color: string, size: string, quantity: number) {
@@ -83,7 +90,9 @@ export default function CartPage() {
           <div className="row g-4 align-items-start">
             <div className="col-lg-7">
               <div className="d-grid gap-3">
-                {!cart || cart.items.length === 0 ? (
+                {loading ? (
+                  <DataLoader label="Loading cart" />
+                ) : !cart || cart.items.length === 0 ? (
                   <div className="empty">Your cart is empty on this device.</div>
                 ) : (
                   cart.items.map(item => (
