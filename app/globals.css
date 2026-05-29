@@ -1,0 +1,356 @@
+:root {
+  --makz-ink: #171717;
+  --makz-muted: #666a70;
+  --makz-paper: #f7f5f0;
+  --makz-surface: #ffffff;
+  --makz-line: #e5e0d8;
+  --makz-accent: #9b6a38;
+  --makz-accent-dark: #6f4722;
+  --makz-sale: #b42335;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  color: var(--makz-ink);
+  background: var(--makz-paper);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.fw-black {
+  font-weight: 900;
+}
+
+.promo-bar {
+  background: var(--makz-ink);
+  color: #fff;
+  padding: 0.55rem 1rem;
+}
+
+.navbar {
+  --bs-navbar-padding-y: 0.85rem;
+  z-index: 1030;
+}
+
+.brand-mark {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  overflow: hidden;
+  place-items: center;
+  border: 1px solid var(--makz-line);
+  border-radius: 0.5rem;
+  background: #f1eee8;
+}
+
+.brand-mark img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.icon-button {
+  display: inline-grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  padding: 0;
+}
+
+.trust-strip {
+  border-bottom: 1px solid var(--makz-line);
+  background: #fff;
+  padding: 0.55rem 0;
+}
+
+.hero {
+  overflow: hidden;
+  border-bottom: 1px solid var(--makz-line);
+  background:
+    linear-gradient(90deg, rgba(247, 245, 240, 0.96), rgba(247, 245, 240, 0.72)),
+    url("/MAK-Z-04.jpg.jpeg") center / cover;
+}
+
+.hero-copy {
+  min-height: min(700px, calc(100vh - 125px));
+  padding: clamp(4rem, 8vw, 7rem) 0;
+}
+
+.eyebrow {
+  color: var(--makz-accent-dark);
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.display-title {
+  max-width: 720px;
+  font-size: clamp(3rem, 10vw, 7.5rem);
+  font-weight: 950;
+  letter-spacing: 0;
+  line-height: 0.9;
+}
+
+.hero-text {
+  max-width: 560px;
+  color: #3f3f3f;
+  font-size: clamp(1rem, 2.5vw, 1.18rem);
+  line-height: 1.7;
+}
+
+.hero-panel {
+  max-width: 420px;
+  margin-inline: auto;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.76);
+  box-shadow: 0 1.5rem 4rem rgba(0, 0, 0, 0.16);
+  backdrop-filter: blur(18px);
+}
+
+.hero-logo {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 0.85rem;
+  object-fit: cover;
+  background: #f1eee8;
+}
+
+.brand-gallery {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.brand-gallery img,
+.collection-tile img,
+.product-image,
+.detail-image,
+.cart-thumb,
+.admin-preview {
+  background: #eee8de;
+  object-fit: cover;
+}
+
+.brand-gallery img {
+  width: 100%;
+  aspect-ratio: 1;
+  border: 1px solid var(--makz-line);
+  border-radius: 0.65rem;
+}
+
+.section-padding {
+  padding-block: clamp(2.5rem, 6vw, 5rem);
+}
+
+.section-title {
+  font-size: clamp(2rem, 5vw, 3.75rem);
+  font-weight: 900;
+  letter-spacing: 0;
+}
+
+.muted,
+.text-muted {
+  color: var(--makz-muted) !important;
+}
+
+.btn-dark {
+  --bs-btn-bg: var(--makz-ink);
+  --bs-btn-border-color: var(--makz-ink);
+  --bs-btn-hover-bg: #000;
+  --bs-btn-hover-border-color: #000;
+}
+
+.btn-accent {
+  --bs-btn-color: #fff;
+  --bs-btn-bg: var(--makz-accent);
+  --bs-btn-border-color: var(--makz-accent);
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: var(--makz-accent-dark);
+  --bs-btn-hover-border-color: var(--makz-accent-dark);
+}
+
+.collection-tile {
+  position: relative;
+  min-height: 300px;
+  overflow: hidden;
+  border-radius: 1rem;
+  background: #ddd5ca;
+}
+
+.collection-tile img {
+  width: 100%;
+  height: 100%;
+  min-height: 300px;
+  transition: transform 220ms ease;
+}
+
+.collection-tile:hover img {
+  transform: scale(1.04);
+}
+
+.collection-overlay {
+  position: absolute;
+  inset: auto 1rem 1rem 1rem;
+  border-radius: 0.85rem;
+  background: rgba(255, 255, 255, 0.88);
+  padding: 1rem;
+  backdrop-filter: blur(16px);
+}
+
+.product-card {
+  height: 100%;
+  overflow: hidden;
+  border: 1px solid var(--makz-line);
+  border-radius: 1rem;
+  background: #fff;
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.product-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 1rem 2.5rem rgba(22, 22, 22, 0.12);
+}
+
+.product-image {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+}
+
+.price {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  align-items: baseline;
+  font-weight: 900;
+}
+
+.price s {
+  color: var(--makz-muted);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.sale-badge {
+  width: max-content;
+  border-radius: 999px;
+  padding: 0.28rem 0.6rem;
+  background: #f8dfe3;
+  color: var(--makz-sale);
+  font-size: 0.76rem;
+  font-weight: 900;
+}
+
+.filter-panel,
+.panel {
+  border: 1px solid var(--makz-line);
+  border-radius: 1rem;
+  background: #fff;
+  box-shadow: 0 0.75rem 2rem rgba(22, 22, 22, 0.05);
+}
+
+.empty {
+  border: 1px dashed #cfc7bb;
+  border-radius: 1rem;
+  background: #fff;
+  color: var(--makz-muted);
+  padding: 2rem;
+}
+
+.detail-image {
+  width: 100%;
+  max-height: 720px;
+  border: 1px solid var(--makz-line);
+  border-radius: 1rem;
+}
+
+.thumb {
+  width: 72px;
+  height: 86px;
+  overflow: hidden;
+  border: 1px solid var(--makz-line);
+  border-radius: 0.65rem;
+  padding: 0;
+  background: #fff;
+}
+
+.thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.active-thumb,
+.active-option {
+  border-color: var(--makz-accent) !important;
+  box-shadow: 0 0 0 0.18rem rgba(155, 106, 56, 0.18);
+}
+
+.option {
+  min-width: 54px;
+}
+
+.cart-thumb {
+  width: 88px;
+  height: 108px;
+  border-radius: 0.75rem;
+}
+
+.admin-preview {
+  width: 86px;
+  height: 100px;
+  border: 1px solid var(--makz-line);
+  border-radius: 0.75rem;
+}
+
+.file-picker input {
+  display: none;
+}
+
+.message {
+  min-height: 1.5rem;
+  color: var(--makz-muted);
+  font-weight: 700;
+}
+
+@media (max-width: 991.98px) {
+  .navbar-collapse {
+    padding-top: 1rem;
+  }
+
+  .hero {
+    background:
+      linear-gradient(180deg, rgba(247, 245, 240, 0.98), rgba(247, 245, 240, 0.9)),
+      url("/MAK-Z-04.jpg.jpeg") center / cover;
+  }
+
+  .hero-copy {
+    min-height: auto;
+    padding-block: 3rem;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .brand-gallery {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .display-title {
+    font-size: clamp(3.25rem, 18vw, 5.25rem);
+  }
+
+  .cart-thumb {
+    width: 74px;
+    height: 92px;
+  }
+}
